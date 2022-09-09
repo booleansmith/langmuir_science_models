@@ -35,7 +35,9 @@
 
 % KNOWN CONSTANTS
 k_b = 1.38e-23;  % Boltsmann constant m^2*kg*s^-2*K^-1
-e   = -1.602e-19; % electron charge coulombs
+e   = 1.602e-19; % elementary charge
+q_e   = -1.602e-19; % electron charge coulombsq_e   = -1.602e-19; % electron charge coulombs
+q_i   = 1.602e-19;  % ion charge coulombs
 m_e = 5.486e-4; % electron mass, kg
 
 % Environment Parameters
@@ -44,27 +46,40 @@ T = 1160; % Temperature, K
 m_i = 16; % O+ ion mass
 
 phi = -2:0.01:3; % Bias potential, Volts
-phi_p = -1; % plasma potential, Volts
+phi_p = 1; % plasma potential, Volts
 V_sc  = -7.4e3; % SC velocity, m/s
 
 
 % Probe parameters
-A_proj = 1e-3*85.2e-3; % projected area, m^2
-A      = pi*0.5e-3*85.2e-3; % OML collection area, m^2
+% probeRadius = 0.5e-3;    % meters
+% probeHeight = 85.2e-3; % meters
+probeRadius = 0.5;    % meters
+probeHeight = 85.2; % meters
+A_proj = probeRadius*2*probeHeight; % projected area, m^2
+A      = pi*probeRadius*probeHeight; % OML collection area, m^2
 beta = 1;
 
 I_ram = n*A_proj*e*V_sc;
-I_th_e = n*e*A*sqrt((k_b*T)/(2*pi*m_e));
-I_th_i = -n*e*A*sqrt((k_b*T)/(2*pi*m_i));
+I_th_e = n*q_e*A*sqrt((k_b*T)/(2*pi*m_e));
+I_th_i = n*q_i*A*sqrt((k_b*T)/(2*pi*m_i));
 I_OML_i = I_th_i*(1-((e*(phi-phi_p))/(k_b*T))).^beta;
 I_e     = I_th_e*exp((e*(phi-phi_p))/(k_b*T));
 
 I = -I_ram -I_OML_i + I_e;
 
 figure
-plot(phi,I)
-yyaxis right
-plot(phi(2:end),diff(I))
+tiledlayout('flow')
+nexttile
+plot(phi,-I)
+nexttile
+plot(phi,-I_OML_i)
+nexttile
+plot(phi,-I_e)
+
+%%
+
+figure
+plot(phi,-I_e)
 
 
 
