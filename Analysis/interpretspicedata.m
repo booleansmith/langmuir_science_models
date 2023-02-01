@@ -48,8 +48,8 @@ end
 
 
 %% SPORT Model
-
-
+d2 = data(data.steps == 1200,:);
+gettempdensityest(d2.appliedpotential,-d2.("Ix(LP:Plasma)"),1200,1,false)
 
 
 
