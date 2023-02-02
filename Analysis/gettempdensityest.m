@@ -13,12 +13,12 @@ function [t,n] = gettempdensityest(V,I,dodebug,temp,density)
 %   V  - (double array) a vector of applied potentials
 %   I  - (double array) a vector of measured currents
 %        corresponding to applied potentials
-%   tg - (double) the estimated temperature
-%   ng - (double) the estimated density
 %
 % OPTIONAL INPUTS
 %
 %   dodebug - (boolean) optionally enable plots for debugging
+%   temp    - (double) the actual temperature measurement
+%   density - (double) the actual density measurement
 %
 % OUTPUTS:
 %
@@ -27,7 +27,7 @@ function [t,n] = gettempdensityest(V,I,dodebug,temp,density)
 % 
 % ASSUMPTIONS AND LIMITATIONS:
 %
-%   none
+%   An oxygen ion plasma is assumed
 %
 % Jason Powell
 % January 31, 2023
