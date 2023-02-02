@@ -49,9 +49,12 @@ end
 
 %% SPORT Model
 d2 = data(data.steps == 1200,:);
-gettempdensityest(d2.appliedpotential,-d2.("Ix(LP:Plasma)"),1200,1,false)
+[t,n] = gettempdensityest(d2.appliedpotential,-d2.("Ix(LP:Plasma)"),true);
 
 
+fprintf('Swenson Temp Guess: %d, Density Guess: %d\n',t(2),n(2))
+fprintf('Swenson Cyl Guess: %d, Density Guess: %d\n',t(3),n(3))
+fprintf('Debchoudhury Temp Guess: %d, Density Guess: %d\n',t(1),n(1))
 
 
 
