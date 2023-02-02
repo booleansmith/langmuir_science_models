@@ -23,7 +23,7 @@ boxpath = getboxpath;
 temperatureData = fullfile(boxpath,"LTspice","langmuir","LangmuirTemp.txt");
 data = loadspicefile(temperatureData);
 data.appliedpotential = data.v1 + data.("V(scground)");
-save(fullfile(boxpath,"LTspice","langmuir","LangmuirTemp.m"),"data")
+save(fullfile(boxpath,"LTspice","langmuir","LangmuirTemp.mat"),"data")
 
 %% Plot the data
 
