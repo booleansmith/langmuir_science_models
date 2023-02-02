@@ -41,10 +41,17 @@ function data =  loadspicefile(loc)
         steps(i) = splits(4);
     end
 
+    % Spice uses SI unit prefixes that matlab cannot interpret, we strip
+    % them and add values back later
     kfactors = contains(steps,"K");
+    mfactors = contains(steps,"m");
+
     steps = strrep(steps,'K','');
+    steps = strrep(steps,'m','');
+
     steps = str2double(steps);
     steps(kfactors) = steps(kfactors)*1e3;
+    steps(mfactors) = steps(mfactors)*1e-3;
     
     steps = repelem(steps,501,1);
     
