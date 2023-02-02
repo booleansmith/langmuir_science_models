@@ -1,4 +1,4 @@
-function [t,n] = gettempdensityest(V,I,dodebug)
+function [t,n] = gettempdensityest(V,I,dodebug,temp,density)
 % Function NAME:
 %
 %   Get Temperature and Density Estimation
@@ -35,6 +35,16 @@ function [t,n] = gettempdensityest(V,I,dodebug)
 
 if ~exist('dodebug','var')
     dodebug = false;
+end
+
+if ~exist('temp','var')
+    temp = 1200;
+    warning('Temperature data assumed')
+end
+
+if ~exist('density','var')
+    density = 1e12;
+    warning('Density data assumed')
 end
 
 
@@ -134,11 +144,12 @@ x1 = lsqcurvefit(fun,x0,V(m),I(m),bounds(1,:),bounds(2,:),options);
 x2 = lsqcurvefit(@OMLCurrentApprox,x0,V,I,bounds(1,:),bounds(2,:),options);
 x3 = lsqcurvefit(@OMLCurrentCyl,x0,V,I,bounds(1,:),bounds(2,:),options);
 
-xtrue = [1e12,1200,phi_guess,beta,A,Rp];
+xtrue = [density,temp,phi_guess,beta,A,Rp];
 
 
 if dodebug
-    dim = [.2 .5 .3 .3];
+    
+    
 
     figure
     tiledlayout('flow')
@@ -178,6 +189,9 @@ if dodebug
     title('Swenson OML Cyl')
     str = sprintf('N_{est} = %0.2e, T_{est} = %0.2e', x3(1),x3(2));
     text(0.75,0.5*mean(I),str);
+
+    titlestring = sprintf('Actual Paramters: n = %0.2e, T = %0.2e',density,temp);
+    sgtitle(titlestring)
     
 
 end
