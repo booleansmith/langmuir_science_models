@@ -120,11 +120,11 @@ end
 % x(4): beta - OML parameter
 % x(5): A - Area of the probe
 % x(6): Rp - Radius of the probe
-% fun = @(x,phi) -x(1)*A_proj*e*V_sc ... % ion ram current
-%                -x(1)*e*A*sqrt((k_b*x(2))/(2*pi*m_i))*(1-((e*phi)/(k_b*x(2)))).^x(4) ... % ion current
-%                -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % electron current
+fun = @(x,phi) -x(1)*A_proj*e*V_sc ... % ion ram current
+               -x(1)*e*A*sqrt((k_b*x(2))/(2*pi*m_i))*(1-((e*phi)/(k_b*x(2)))).^x(3) ... % ion current
+               -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % electron current
  
-fun = @(x,phi) -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % ion ram current
+
 
 
 % for now we use known values for phi_p and beta
@@ -135,7 +135,7 @@ beta = 0.5;
 
 % Ion saturation region/ Electron retradation region mask
 m = V < 0.01;
-x0 = [ni_est,T_guess,phi_guess,beta,A,Rp]; % initial guesses for lsqcurvefit
+x0 = [ni_est,T_guess,beta,A,Rp]; % initial guesses for lsqcurvefit
 bounds(1,:) = [ni_est - 0.5*ni_est, 300,phi_guess,beta, A, Rp];
 bounds(2,:) = [ni_est + 0.5*ni_est, 5000,phi_guess,beta, A, Rp];
 tolerance = 1e-25;

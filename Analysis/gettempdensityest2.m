@@ -62,7 +62,6 @@ probeHeight = 85.2e-3; % meters
 A_proj = probeRadius*2*probeHeight; % projected area, m^2
 % A      = 2*pi*probeRadius*probeHeight; % OML collection area, m^2
 A = 297.287e-6; % TODO: The actual area of SPORT LP needs to be decided
-Rp = 0.5e-3; % radius of the probe, m
 beta = 0.5;
 V_sc  = 7.4e3; % SC velocity, m/s
 
@@ -116,7 +115,13 @@ end
 
 %% Estimate the sheath potential
 
+% The floating potential meters monitor the change in the SC potential,
+% this change needs to be included in sheath potential considerations
 maxFpp = max(fpp);
+deltaVf = fpp - maxFpp;
+
+% Calculate the potential across the sheath
+phi_s = V + vf + deltaVf;
 
 
 
@@ -125,27 +130,21 @@ maxFpp = max(fpp);
 % x(1): n - number density
 % x(2): T - temperature
 % x(3): phi_p - plasma potential
-% x(4): beta - OML parameter
-% x(5): A - Area of the probe
-% x(6): Rp - Radius of the probe
-% fun = @(x,phi) -x(1)*A_proj*e*V_sc ... % ion ram current
-%                -x(1)*e*A*sqrt((k_b*x(2))/(2*pi*m_i))*(1-((e*phi)/(k_b*x(2)))).^x(4) ... % ion current
-%                -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % electron current
- 
-fun = @(x,phi) -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % ion ram current
+% x(4): A - Area of the probe
+% x(5): Rp - Radius of the probe
 
-
-% for now we use known values for phi_p and beta
-T_guess = 1250; % kelvin
-phi_guess = phi_p;
-% beta_guess = beta;
-beta = 0.5;
-
+fun = @(x,phi) -x(1)*A_proj*e*V_sc ... % ion ram current
+               -x(1)*e*A*sqrt((k_b*x(2))/(2*pi*m_i))*(1-((e*phi)/(k_b*x(2)))).^x(3) ... % ion current
+               -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % electron current
 % Ion saturation region/ Electron retradation region mask
-m = V < 0.01;
-x0 = [ni_est,T_guess,phi_guess,beta,A,Rp]; % initial guesses for lsqcurvefit
-bounds(1,:) = [ni_est - 0.5*ni_est, 300,phi_guess,beta, A, Rp];
-bounds(2,:) = [ni_est + 0.5*ni_est, 5000,phi_guess,beta, A, Rp];
+m = V < 0.01; 
+
+
+T_guess = 1250; % kelvin
+
+x0 = [ni_est,T_guess,beta,A,probeRadius]; % initial guesses for lsqcurvefit
+bounds(1,:) = [ni_est - 0.5*ni_est, 300,beta, A, Rp];
+bounds(2,:) = [ni_est + 0.5*ni_est, 5000,beta, A, Rp];
 tolerance = 1e-25;
 options = optimoptions('lsqcurvefit','Algorithm','levenberg-marquardt','StepTolerance',tolerance,'FunctionTolerance',tolerance);
 x1 = lsqcurvefit(fun,x0,V(m),I(m),bounds(1,:),bounds(2,:),options);

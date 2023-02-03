@@ -18,8 +18,7 @@ function [I] = OMLCurrentApprox(x,phi)
 %       x(1): n - number density
 %       x(2): T - temperature
 %       x(3): phi_p - plasma potential (not used)
-%       x(4): beta - OML parameter
-%       x(5): Ap- Area of the probe
+%       x(4): Ap- Area of the probe
 %
 %   phi - (double array) a vector of applied bias potentials. This should
 %       represent a best guess for the potential across the sheath
@@ -41,7 +40,7 @@ function [I] = OMLCurrentApprox(x,phi)
 %% Constants
 k_b = 1.38e-23;  % Boltsmann constant m^2*kg*s^-2*K^-1
 e   = 1.602e-19; % elementary charge
-
+beta = 0.5;
 
 %% Oxygen Ion current collection
 
@@ -52,9 +51,9 @@ Phi_si = -e*phi/(k_b*x(2));
 
 F_i = zeros(length(phi),1);
 F_i(Phi_si < 0) = exp(Phi_si(Phi_si < 0));
-F_i(Phi_si >= 0) = (1+Phi_si(Phi_si >= 0)).^x(4);
+F_i(Phi_si >= 0) = (1+Phi_si(Phi_si >= 0)).^beta;
 
-I_i = Jsat_i*x(5)*F_i;
+I_i = Jsat_i*x(4)*F_i;
 
 %% Electron Current
 
@@ -65,9 +64,9 @@ Phi_se = e*phi/(k_b*x(2));
 
 F_e = zeros(length(phi),1);
 F_e(Phi_se < 0) = exp(Phi_se(Phi_se < 0));
-F_e(Phi_se >= 0) = (1+Phi_se(Phi_se >= 0)).^x(4);
+F_e(Phi_se >= 0) = (1+Phi_se(Phi_se >= 0)).^beta;
 
-I_e = Jsat_e*x(5)*F_e;
+I_e = Jsat_e*x(4)*F_e;
     
 %% Sum
 
