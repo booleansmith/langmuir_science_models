@@ -79,7 +79,8 @@ vf = interp1(I,V,0); % The voltage at the zero current threshold
 
 % plasma potential
 Idot = gradient(I,V); % di/dv
-phi_p = max(Idot(V > vf & V < vf+1.5));
+Idot_max = max(Idot(V > vf & V < vf+1.5));
+phi_p = V(Idot == Idot_max);
 
 % ion density
 index = V > -2 & V < -1.5;
