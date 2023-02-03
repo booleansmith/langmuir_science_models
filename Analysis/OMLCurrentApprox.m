@@ -17,8 +17,7 @@ function [I] = OMLCurrentApprox(x,phi)
 %   x   - (double array) a vector of plasma paramters
 %       x(1): n - number density
 %       x(2): T - temperature
-%       x(3): phi_p - plasma potential (not used)
-%       x(4): Ap- Area of the probe
+%       x(3): Ap- Area of the probe
 %
 %   phi - (double array) a vector of applied bias potentials. This should
 %       represent a best guess for the potential across the sheath
@@ -53,7 +52,7 @@ F_i = zeros(length(phi),1);
 F_i(Phi_si < 0) = exp(Phi_si(Phi_si < 0));
 F_i(Phi_si >= 0) = (1+Phi_si(Phi_si >= 0)).^beta;
 
-I_i = Jsat_i*x(4)*F_i;
+I_i = Jsat_i*x(3)*F_i;
 
 %% Electron Current
 
@@ -66,7 +65,7 @@ F_e = zeros(length(phi),1);
 F_e(Phi_se < 0) = exp(Phi_se(Phi_se < 0));
 F_e(Phi_se >= 0) = (1+Phi_se(Phi_se >= 0)).^beta;
 
-I_e = Jsat_e*x(4)*F_e;
+I_e = Jsat_e*x(3)*F_e;
     
 %% Sum
 

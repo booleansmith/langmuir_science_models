@@ -17,9 +17,8 @@ function [I] = OMLCurrentCyl(x,phi)
 %   x   - (double array) a vector of plasma paramters
 %       x(1): n      - number density (m^-3)
 %       x(2): T      - temperature (K)
-%       x(3): phi_p - plasma potential (not used)
-%       x(4): Ap    - Surface Area of the probe (m^2)
-%       x(5): Rp    - Radius of the probe (m)
+%       x(3): Ap    - Surface Area of the probe (m^2)
+%       x(4): Rp    - Radius of the probe (m)
 %
 %   phi - (double array) a vector of applied bias potentials. This should
 %       represent a best guess for the potential across the sheath
@@ -47,7 +46,7 @@ beta = 0.5;
 %% Calculate the Debye Length and probe ratio, epsilon
 
 lambda_debye = sqrt(epsilon_0*k_b*x(2)/(x(1)*e^2));
-epsilon = (lambda_debye + x(5))/x(5);
+epsilon = (lambda_debye + x(4))/x(4);
 
 %% Oxygen Ion current collection
 
@@ -62,7 +61,7 @@ F_i(Phi_si < 0) = exp(Phi_si(Phi_si < 0));
 F_i(Phi_si >= 0) = epsilon*erf(Phi_si_tilde(Phi_si >= 0)) ... 
                    +exp(Phi_si(Phi_si >= 0)).*erfc(epsilon*Phi_si_tilde(Phi_si >= 0));
 
-I_i = Jsat_i*x(4)*F_i;
+I_i = Jsat_i*x(3)*F_i;
 
 %% Electron Current
 
@@ -77,7 +76,7 @@ F_e(Phi_se < 0) = exp(Phi_se(Phi_se < 0));
 F_e(Phi_se >= 0) = epsilon*erf(Phi_se_tilde(Phi_se >= 0)) ... 
                    +exp(Phi_se(Phi_se >= 0)).*erfc(epsilon*Phi_se_tilde(Phi_se >= 0));
 
-I_e = Jsat_e*x(4)*F_e;
+I_e = Jsat_e*x(3)*F_e;
     
 %% Sum
 
