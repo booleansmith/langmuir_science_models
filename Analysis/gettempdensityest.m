@@ -104,7 +104,7 @@ if dodebug
     yyaxis right
     plot(V,Idot)
     hold on
-    plot(phi_p,Idot(Idot == phi_p),"*",'MarkerSize',5)
+    plot(phi_p,Idot_max,"*",'MarkerSize',5)
     xlabel('Bias Potential (V)')
     ylabel('dI/dV')
 
@@ -152,10 +152,10 @@ if dodebug
     tiledlayout('flow')
 
     nexttile % Debchoudhury
-    plot(V,I)
+    semilogy(V,abs(I))
     hold on
-    plot(V(m),fun(x1,V(m)))
-    plot(V(m),fun(xtrue,V(m)))
+    semilogy(V(m),abs(fun(x1,V(m))))
+    semilogy(V(m),abs(fun(xtrue,V(m))))
     legend('LTSpice','Line Fit','Matlab','Location','northwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
@@ -164,10 +164,10 @@ if dodebug
     text(0.75,0.5*mean(I),str);
 
     nexttile % Swenson OML Approx
-    plot(V,I)
+    semilogy(V,abs(I))
     hold on
-    plot(V,OMLCurrentApprox(x2,V))
-    plot(V,OMLCurrentApprox(xtrue,V))
+    semilogy(V,abs(OMLCurrentApprox(x2,V)))
+    semilogy(V,abs(OMLCurrentApprox(xtrue,V)))
     legend('LTSpice','Line Fit','Matlab','Location','northwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
@@ -176,10 +176,10 @@ if dodebug
     text(0.75,0.5*mean(I),str);
     
     nexttile % Swenson OML
-    plot(V,I)
+    semilogy(V,abs(I))
     hold on
-    plot(V,OMLCurrentCyl(x3,V))
-    plot(V,OMLCurrentCyl(xtrue,V))
+    semilogy(V,abs(OMLCurrentCyl(x3,V)))
+    semilogy(V,abs(OMLCurrentCyl(xtrue,V)))
     legend('LTSpice','Line Fit','Matlab','Location','northwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')

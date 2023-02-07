@@ -1,4 +1,4 @@
-function [t,n] = gettempdensityest2(V,I,fpp,dodebug,temp,density)
+function [t,n] = gettempdensityest2(V,I,fpp,dodebug,temp,density,appliedPotential)
 % Function NAME:
 %
 %   Get Temperature and Density Estimation 2
@@ -48,6 +48,11 @@ if ~exist('density','var')
     warning('Density data assumed')
 end
 
+if ~exist('appliedPotential','var')
+    appliedPotential = V;
+    warning('Applied Potential data assumed')
+end
+
 
 % KNOWN CONSTANTS
 k_b = 1.38e-23;  % Boltsmann constant m^2*kg*s^-2*K^-1
@@ -81,14 +86,13 @@ vf = interp1(I,V,0); % The voltage at the zero current threshold
 
 % plasma potential
 Idot = gradient(I,V); % di/dv
-phi_p = max(Idot(V > vf & V < vf+1.5));
+Idot_max = max(Idot(V > vf & V < vf+1.5));
+phi_p = V(Idot == Idot_max);
 
 % ion density
 index = V > -2 & V < -1.5;
 p = polyfit(V(index),I(index),1);
 I_ram_est = -polyval(p,phi_p);
-% Note, when the sc does not have a velocity, this method will not work.
-V_sc = 3.0258e+03; 
 ni_est = I_ram_est/(A_proj*e*V_sc);
 
 
@@ -105,7 +109,7 @@ if dodebug
     yyaxis right
     plot(V,Idot)
     hold on
-    plot(phi_p,Idot(Idot == phi_p),"*",'MarkerSize',5)
+    plot(phi_p,Idot_max,"*",'MarkerSize',5)
     xlabel('Bias Potential (V)')
     ylabel('dI/dV')
 
@@ -117,85 +121,110 @@ end
 
 % The floating potential meters monitor the change in the SC potential,
 % this change needs to be included in sheath potential considerations
-maxFpp = max(fpp);
-deltaVf = fpp - maxFpp;
+minFpp = min(fpp);
+deltaVf = fpp - minFpp;
 
 % Calculate the potential across the sheath
-phi_s = V + vf + deltaVf;
+phi_s = V - phi_p - fpp;
 
+
+if dodebug
+    figure
+    plot(V,appliedPotential)
+    hold on
+    plot(V,phi_s)
+    title('Verification of Sheath Potential Estimation')
+    legend('Actual','Estimation')
+    xlabel('Probe Potential, \phi_0')
+    ylabel('Sheath Potential, \phi_s')
+
+end
 
 
 %% Do non-linear curve fitting
 
 % x(1): n - number density
 % x(2): T - temperature
-% x(3): phi_p - plasma potential
-% x(4): A - Area of the probe
-% x(5): Rp - Radius of the probe
+% x(3): A - Area of the probe
+% x(4): Rp - Radius of the probe
 
 fun = @(x,phi) -x(1)*A_proj*e*V_sc ... % ion ram current
-               -x(1)*e*A*sqrt((k_b*x(2))/(2*pi*m_i))*(1-((e*phi)/(k_b*x(2)))).^x(3) ... % ion current
+               -x(1)*e*A*sqrt((k_b*x(2))/(2*pi*m_i))*(1-((e*phi)/(k_b*x(2)))).^beta ... % ion current
                -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % electron current
 % Ion saturation region/ Electron retradation region mask
-m = V < 0.01; 
+m = phi_s < 0.01; 
+m2 = appliedPotential < 0.01;
 
 
 T_guess = 1250; % kelvin
+T_max = 5000;
+T_min = 300;
 
-x0 = [ni_est,T_guess,beta,A,probeRadius]; % initial guesses for lsqcurvefit
-bounds(1,:) = [ni_est - 0.5*ni_est, 300,beta, A, Rp];
-bounds(2,:) = [ni_est + 0.5*ni_est, 5000,beta, A, Rp];
+x0 = [ni_est,T_guess,A,probeRadius, V_sc, pi/2]; % initial guesses for lsqcurvefit
+bounds(1,:) = [ni_est - 0.5*ni_est, T_min, A, probeRadius, V_sc, pi/2];
+bounds(2,:) = [ni_est + 0.5*ni_est, T_max, A, probeRadius, V_sc, pi/2];
 tolerance = 1e-25;
 options = optimoptions('lsqcurvefit','Algorithm','levenberg-marquardt','StepTolerance',tolerance,'FunctionTolerance',tolerance);
-x1 = lsqcurvefit(fun,x0,V(m),I(m),bounds(1,:),bounds(2,:),options);
-x2 = lsqcurvefit(@OMLCurrentApprox,x0,V,I,bounds(1,:),bounds(2,:),options);
-x3 = lsqcurvefit(@OMLCurrentCyl,x0,V,I,bounds(1,:),bounds(2,:),options);
+x1 = lsqcurvefit(fun                 ,x0,phi_s(m),I(m),bounds(1,:),bounds(2,:),options);
+x2 = lsqcurvefit(@OMLCurrentApprox   ,x0,phi_s,I,bounds(1,:),bounds(2,:),options);
+x3 = lsqcurvefit(@OMLCurrentCyl      ,x0,phi_s,I,bounds(1,:),bounds(2,:),options);
+x4 = lsqcurvefit(@OMLCurrentCylMoving,x0,phi_s,I,bounds(1,:),bounds(2,:),options);
 
-xtrue = [density,temp,phi_guess,beta,A,Rp];
+xtrue = [density,temp,A,probeRadius, V_sc, pi/2];
 
 
 if dodebug
     
-    
-
     figure
     tiledlayout('flow')
 
     nexttile % Debchoudhury
-    plot(V,I)
+    semilogy(phi_s,abs(I))
     hold on
-    plot(V(m),fun(x1,V(m)))
-    plot(V(m),fun(xtrue,V(m)))
+    semilogy(phi_s(m),abs(fun(x1,phi_s(m))))
+    semilogy(appliedPotential(m2),abs(fun(xtrue,appliedPotential(m2))))
     legend('LTSpice','Line Fit','Matlab','Location','northwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
     title('Debchoudhury')
     str = sprintf('N_{est} = %0.2e, T_{est} = %0.2e', x1(1),x1(2));
-    text(0.75,0.5*mean(I),str);
+    text(min(phi_s)*9/10,0.5*mean(I),str);
 
     nexttile % Swenson OML Approx
-    plot(V,I)
+    semilogy(phi_s,abs(I))
     hold on
-    plot(V,OMLCurrentApprox(x2,V))
-    plot(V,OMLCurrentApprox(xtrue,V))
+    semilogy(phi_s,abs(OMLCurrentApprox(x2,phi_s)))
+    semilogy(appliedPotential,abs(OMLCurrentApprox(xtrue,appliedPotential)))
     legend('LTSpice','Line Fit','Matlab','Location','northwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
     title('Swenson OML Approx')
     str = sprintf('N_{est} = %0.2e, T_{est} = %0.2e', x2(1),x2(2));
-    text(0.75,0.5*mean(I),str);
+    text(min(phi_s)*9/10,0.5*mean(I),str);
     
     nexttile % Swenson OML
-    plot(V,I)
+    semilogy(phi_s,abs(I))
     hold on
-    plot(V,OMLCurrentCyl(x3,V))
-    plot(V,OMLCurrentCyl(xtrue,V))
+    semilogy(phi_s,abs(OMLCurrentCyl(x3,phi_s)))
+    semilogy(appliedPotential,abs(OMLCurrentCyl(xtrue,appliedPotential)))
     legend('LTSpice','Line Fit','Matlab','Location','northwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
     title('Swenson OML Cyl')
     str = sprintf('N_{est} = %0.2e, T_{est} = %0.2e', x3(1),x3(2));
-    text(0.75,0.5*mean(I),str);
+    text(min(phi_s)*9/10,0.5*mean(I),str);
+
+    nexttile % Swenson OML Moving
+    semilogy(phi_s,abs(I))
+    hold on
+    semilogy(phi_s,abs(OMLCurrentCylMoving(x4,phi_s)))
+    semilogy(appliedPotential,abs(OMLCurrentCylMoving(xtrue,appliedPotential)))
+    legend('LTSpice','Line Fit','Matlab','Location','northwest')
+    xlabel('Potential Across Sheath, \phi_s [V]')
+    ylabel('Current Collected by Probe [A]')
+    title('Swenson OML Cyl Moving')
+    str = sprintf('N_{est} = %0.2e, T_{est} = %0.2e', x3(1),x3(2));
+    text(min(phi_s)*9/10,0.5*mean(I),str);
 
     titlestring = sprintf('Actual Paramters: n = %0.2e, T = %0.2e',density,temp);
     sgtitle(titlestring)

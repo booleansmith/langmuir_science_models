@@ -53,8 +53,7 @@ end
 
 
 %% Attempt to estimate Temperature/ Density
-
-temps = unique(data.steps);
+                                                             s);
 density = 1e12;
 for i = 1:height(temps)
     d2 = data(data.steps == temps(i),:);
