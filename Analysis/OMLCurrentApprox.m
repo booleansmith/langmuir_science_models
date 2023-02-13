@@ -18,6 +18,7 @@ function [I] = OMLCurrentApprox(x,phi)
 %       x(1): n - number density
 %       x(2): T - temperature
 %       x(3): Ap- Area of the probe
+%       x(7): beta
 %
 %   phi - (double array) a vector of applied bias potentials. This should
 %       represent a best guess for the potential across the sheath
@@ -39,7 +40,7 @@ function [I] = OMLCurrentApprox(x,phi)
 %% Constants
 k_b = 1.38e-23;  % Boltsmann constant m^2*kg*s^-2*K^-1
 e   = 1.602e-19; % elementary charge
-beta = 0.5;
+beta = x(7);
 
 %% Oxygen Ion current collection
 

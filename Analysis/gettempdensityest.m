@@ -119,6 +119,7 @@ end
 % x(2): T - temperature
 % x(3): A - Area of the probe
 % x(4): Rp - Radius of the probe
+% x(7): beta
 fun = @(x,phi) -x(1)*A_proj*e*V_sc ... % ion ram current
                -x(1)*e*A*sqrt((k_b*x(2))/(2*pi*m_i))*(1-((e*phi)/(k_b*x(2)))).^beta ... % ion current
                -x(1)*-e*A*sqrt((k_b*x(2))/(2*pi*m_e))*exp((e*phi)/(k_b*x(2))); % electron current
@@ -132,16 +133,16 @@ phi_guess = phi_p;
 
 % Ion saturation region/ Electron retradation region mask
 m = V < 0.01;
-x0 = [ni_est,T_guess,A,Rp]; % initial guesses for lsqcurvefit
-bounds(1,:) = [ni_est - 0.5*ni_est, 300, A,Rp];
-bounds(2,:) = [ni_est + 0.5*ni_est, 5000, A, Rp];
+x0 = [ni_est,T_guess,A,Rp,0,0,0.5]; % initial guesses for lsqcurvefit
+bounds(1,:) = [ni_est - 0.5*ni_est, 300, A,Rp,0,0,0];
+bounds(2,:) = [ni_est + 0.5*ni_est, 5000, A, Rp,0,0,1];
 tolerance = 1e-25;
 options = optimoptions('lsqcurvefit','Algorithm','levenberg-marquardt','StepTolerance',tolerance,'FunctionTolerance',tolerance);
 x1 = lsqcurvefit(fun,x0,V(m),I(m),bounds(1,:),bounds(2,:),options);
 x2 = lsqcurvefit(@OMLCurrentApprox,x0,V,I,bounds(1,:),bounds(2,:),options);
 x3 = lsqcurvefit(@OMLCurrentCyl,x0,V,I,bounds(1,:),bounds(2,:),options);
 
-xtrue = [density,temp,A,Rp];
+xtrue = [density,temp,A,Rp,0,0,0.5];
 
 
 if dodebug
