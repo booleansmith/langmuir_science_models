@@ -96,26 +96,26 @@ I_ram_est = -polyval(p,phi_p);
 ni_est = I_ram_est/(A_proj*e*V_sc);
 
 
-% if dodebug 
-%     figure
-%     plot(V,I)
-%     hold on
-%     plot(vf,0,"*",'MarkerSize',5)
-%     plot(V,polyval(p,V),'--k','LineWidth',1)
-%     xline(phi_p,'--k')
-%     plot(phi_p,-I_ram_est,"*",'MarkerSize',5)
-%     text(phi_p+.05,-I_ram_est-2.5e-7,sprintf('n_i = %0.2e',ni_est))
-%     ylabel('Return Current (A)')
-%     yyaxis right
-%     plot(V,Idot)
-%     hold on
-%     plot(phi_p,Idot_max,"*",'MarkerSize',5)
-%     xlabel('Bias Potential (V)')
-%     ylabel('dI/dV')
-% 
-%     title('First Stage parameters from IV curve')
-%     legend('I','Vf','','','I_{Ram}','dI/dV','\Phi_p')
-% end
+if dodebug 
+    figure
+    plot(V,I)
+    hold on
+    plot(vf,0,"*",'MarkerSize',5)
+    plot(V,polyval(p,V),'--k','LineWidth',1)
+    xline(phi_p,'--k')
+    plot(phi_p,-I_ram_est,"*",'MarkerSize',5)
+    text(phi_p+.05,-I_ram_est-2.5e-7,sprintf('n_i = %0.2e',ni_est))
+    ylabel('Return Current (A)')
+    yyaxis right
+    plot(V,Idot)
+    hold on
+    plot(phi_p,Idot_max,"*",'MarkerSize',5)
+    xlabel('Bias Potential (V)')
+    ylabel('dI/dV')
+
+    title('First Stage parameters from IV curve')
+    legend('I','\Phi_f','','','I_{Ram_{i}}','dI/dV','\Phi_p')
+end
 
 %% Estimate the sheath potential
 
@@ -188,7 +188,7 @@ if dodebug
     hold on
     semilogy(phi_s(m),abs(fun(x1,phi_s(m))))
     semilogy(phi_s(m),abs(fun(xtrue,phi_s(m))))
-    legend('LTSpice','Line Fit','Matlab','Location','northwest')
+    legend('LTSpice','Line Fit','Model','Location','southwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
     title('Debchoudhury')
@@ -200,7 +200,7 @@ if dodebug
     hold on
     semilogy(phi_s,abs(OMLCurrentApprox(x2,phi_s)))
     semilogy(phi_s,abs(OMLCurrentApprox(xtrue,phi_s)))
-    legend('LTSpice','Line Fit','Matlab','Location','northwest')
+    legend('LTSpice','Line Fit','Model','Location','southwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
     title('Swenson OML Approx')
@@ -212,7 +212,7 @@ if dodebug
     hold on
     semilogy(phi_s,abs(OMLCurrentCyl(x3,phi_s)))
     semilogy(phi_s,abs(OMLCurrentCyl(xtrue,phi_s)))
-    legend('LTSpice','Line Fit','Matlab','Location','northwest')
+    legend('LTSpice','Line Fit','Model','Location','southwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
     title('Swenson OML Cyl')
@@ -224,7 +224,7 @@ if dodebug
     hold on
     semilogy(phi_s,abs(OMLCurrentCylMoving(x4,phi_s)))
     semilogy(phi_s,abs(OMLCurrentCylMoving(xtrue,phi_s)))
-    legend('LTSpice','Line Fit','Matlab','Location','northwest')
+    legend('LTSpice','Line Fit','Model','Location','southwest')
     xlabel('Potential Across Sheath, \phi_s [V]')
     ylabel('Current Collected by Probe [A]')
     title('Swenson OML Cyl Moving')
