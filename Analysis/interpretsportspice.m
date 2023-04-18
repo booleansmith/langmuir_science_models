@@ -20,9 +20,10 @@ boxpath = getboxpath;
 %% Load SPORTmodelV5 from .txt file, 
 % This only needs to be done once, but is nice to see demonstrate how to get the spice data as a matlab table
 
-sportData = fullfile(boxpath,"LTspice","langmuir","SPORTmodelV5_2.txt");
+sportData = fullfile(boxpath,"LTspice","langmuir","SPORTmodelV5.1.txt");
+
 data = loadspicefile(sportData);
-save(fullfile(boxpath,"LTspice","langmuir","SPORTmodelV5_2.mat"),"data")
+save(fullfile(boxpath,"LTspice","langmuir","SPORTmodelV5.1.mat"),"data")
 
 %% Plot the data
 

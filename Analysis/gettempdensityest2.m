@@ -1,4 +1,4 @@
-function [t,n] = gettempdensityest2(V,I,fpp,dodebug,temp,density,appliedPotential)
+function [t,n] = gettempdensityest2(V,I,probe,fpp,dodebug)
 % Function NAME:
 %
 %   Get Temperature and Density Estimation 2
@@ -34,24 +34,14 @@ function [t,n] = gettempdensityest2(V,I,fpp,dodebug,temp,density,appliedPotentia
 % Feb 02, 2023
 %%
 
-if ~exist('dodebug','var')
-    dodebug = false;
+arguments
+    V (1,:) double
+    I (1,:) double
+    probe (1,1) struct
+    fpp (1,:) double = zeros(size(V))
+    dodebug logical = false;
 end
 
-if ~exist('temp','var')
-    temp = 1200;
-    warning('Temperature data assumed')
-end
-
-if ~exist('density','var')
-    density = 1e12;
-    warning('Density data assumed')
-end
-
-if ~exist('appliedPotential','var')
-    appliedPotential = V;
-    warning('Applied Potential data assumed')
-end
 
 
 % KNOWN CONSTANTS
